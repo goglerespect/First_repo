@@ -1,3 +1,9 @@
-print("Hello World")
+def say_hello(name):
+    print(f'Hello {name}')
 
-print("Hello Git")
+def main():
+    print("You imported hello.py")
+    say_hello('user')
+
+if __name__ == '__main__':
+    main()
