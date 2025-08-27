@@ -41,9 +41,8 @@ class Record:
     def edit_phone(self, old_phone: str, new_phone: str):
         phone_obj = self.find_phone(old_phone)
         if phone_obj:
-            if not Phone.validate(new_phone):
-                raise ValueError("New phone number must contain exactly 10 digits")
-            phone_obj.value = new_phone
+            self.add_phone(new_phone)
+            self.remove_phone(old_phone)
         else:
             raise ValueError(f"Phone {old_phone} not found")
 
@@ -71,3 +70,4 @@ class AddressBook(UserDict):
 
     def __str__(self):
         return "\n".join(str(record) for record in self.data.values())
+    
