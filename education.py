@@ -1,20 +1,23 @@
-class NameTooShortError(Exception):
-    pass
+from contextlib import contextmanager
+from datetime import datetime
 
-class NameStartsFromLowError(Exception):
-    pass
 
-def enter_name():
-    name = input("Enter name: ")
-    if len(name) < 3:
-        raise NameTooShortError("Name is too short, need more than 2 symbols")
-    if not name[0].isupper():
-        raise NameStartsFromLowError("Name should start from capital letter")
-    return name
-
-if __name__ == "__main__":
+@contextmanager
+def managed_resource(*args, **kwargs):
+    log = ''
+    timestamp = datetime.now().timestamp()
+    msg = f'{timestamp:<20}|{args[0]:^15}| open \n'
+    log += msg
+    file_handler = open(*args, **kwargs)
     try:
-        name = enter_name()
-        print(f"Hello, {name}")
-    except (NameTooShortError, NameStartsFromLowError) as e:
-        print(e)
+        yield file_handler
+    finally:
+        diff = datetime.now().timestamp() - timestamp
+        msg = f'{timestamp:<20}|{args[0]:^15}| closed {round(diff, 6):>15}s \n'
+        log += msg
+        file_handler.close()
+        print(log)
+
+
+with managed_resource('new_file.txt', 'r') as f:
+    print(f.read())
