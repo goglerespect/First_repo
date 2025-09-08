@@ -1,23 +1,36 @@
-from contextlib import contextmanager
-from datetime import datetime
+import copy
 
+class SimpleObject:
+    def __init__(self, greeting: str):
+        self.greeting = greeting
 
-@contextmanager
-def managed_resource(*args, **kwargs):
-    log = ''
-    timestamp = datetime.now().timestamp()
-    msg = f'{timestamp:<20}|{args[0]:^15}| open \n'
-    log += msg
-    file_handler = open(*args, **kwargs)
-    try:
-        yield file_handler
-    finally:
-        diff = datetime.now().timestamp() - timestamp
-        msg = f'{timestamp:<20}|{args[0]:^15}| closed {round(diff, 6):>15}s \n'
-        log += msg
-        file_handler.close()
-        print(log)
+class ComplexObject:
+    def __init__(self, value: int, nested_obj: SimpleObject):
+        self.value = value
+        self.nested_obj = nested_obj
 
+    def __copy__(self):
+        print("Викликано __copy__ для ComplexObject")
+        # Поверхневе копіювання не копіює вкладені об'єкти глибоко
+        return ComplexObject(self.value, self.nested_obj)
 
-with managed_resource('new_file.txt', 'r') as f:
-    print(f.read())
+    def __deepcopy__(self, memo=None):
+        print("Викликано __deepcopy__ для ComplexObject")
+        # Глибоке копіювання копіює вкладені об'єкти
+        return ComplexObject(
+            copy.deepcopy(self.value, memo), copy.deepcopy(self.nested_obj, memo)
+        )
+
+nested_obj = SimpleObject("Привіт")
+complex_obj = ComplexObject(5, nested_obj)
+
+# Створюємо копію та глибоку копію
+complex_obj_copy = copy.copy(complex_obj)
+complex_obj_deepcopy = copy.deepcopy(complex_obj)
+
+# Змінюємо значення вкладеного об'єкту nested_obj
+nested_obj.greeting = "Hello"
+
+# Дивимось зміни у об'єктах
+print(f"Copy object: {complex_obj_copy.nested_obj.greeting}")
+print(f"Deepcopy object: {complex_obj_deepcopy.nested_obj.greeting}")
