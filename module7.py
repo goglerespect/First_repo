@@ -29,14 +29,15 @@ class Phone(Field):
 
 class Birthday(Field):
     def __init__(self, value: str):
+        # перевіряємо формат, але зберігаємо рядок
         try:
-            bday = datetime.strptime(value, "%d.%m.%Y").date()
+            datetime.strptime(value, "%d.%m.%Y")
         except ValueError:
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
-        super().__init__(bday)
+        super().__init__(value)
 
     def __str__(self):
-        return self.value.strftime("%d.%m.%Y")
+        return self.value
 
 
 class Record:
@@ -95,7 +96,7 @@ class AddressBook(UserDict):
             if not record.birthday:
                 continue
 
-            orig = record.birthday.value
+            orig = datetime.strptime(record.birthday.value, "%d.%m.%Y").date()
             congratulate = orig.replace(year=today.year)
 
             if congratulate < today:
