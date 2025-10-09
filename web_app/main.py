@@ -5,9 +5,11 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 import os
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(BASE_DIR)  # змінюємо робочу директорію на ту, де main.py
 print("[DEBUG] Changed working directory to:", os.getcwd())
+
 # --- Налаштування портів і шляхів ---
 HOST = 'localhost'
 HTTP_PORT = 3000
@@ -79,39 +81,39 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             self.send_html('error.html', 404)
 
     def do_POST(self):
-    # Лог для зручності
-    print(f"[POST] Отримано запит на {self.path}")
+        # Лог для зручності
+        print(f"[POST] Отримано запит на {self.path}")
 
-    # Якщо форма відправлена з /message
-    if self.path.startswith('/message'):
-        try:
-            # Зчитуємо дані з форми
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length).decode('utf-8')
+        # Якщо форма відправлена з /message
+        if self.path.startswith('/message'):
+            try:
+                # Зчитуємо дані з форми
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length).decode('utf-8')
 
-            # Парсимо дані
-            params = parse_qs(post_data)
-            username = params.get('username', [''])[0]
-            message = params.get('message', [''])[0]
+                # Парсимо дані
+                params = parse_qs(post_data)
+                username = params.get('username', [''])[0]
+                message = params.get('message', [''])[0]
 
-            print(f"[OK] Отримано від користувача: {username} -> {message}")
+                print(f"[OK] Отримано від користувача: {username} -> {message}")
 
-            # Відправляємо дані на socket сервер
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            data = json.dumps({'username': username, 'message': message})
-            sock.sendto(data.encode('utf-8'), (HOST, SOCKET_PORT))
-            sock.close()
+                # Відправляємо дані на socket сервер
+                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                data = json.dumps({'username': username, 'message': message})
+                sock.sendto(data.encode('utf-8'), (HOST, SOCKET_PORT))
+                sock.close()
 
-            # Після відправлення — редіректимо на головну
-            self.send_response(302)
-            self.send_header('Location', '/')
-            self.end_headers()
-        except Exception as e:
-            print(f"[ERR] do_POST() помилка: {e}")
-            self.send_html('error.html', 500)
-    else:
-        # Якщо POST не на /message — повертаємо 404
-        self.send_html('error.html', 404)
+                # Після відправлення — редіректимо на головну
+                self.send_response(302)
+                self.send_header('Location', '/')
+                self.end_headers()
+            except Exception as e:
+                print(f"[ERR] do_POST() помилка: {e}")
+                self.send_html('error.html', 500)
+        else:
+            # Якщо POST не на /message — повертаємо 404
+            self.send_html('error.html', 404)
 
     # відправляє html-файли
     def send_html(self, filename, status=200):
