@@ -5,7 +5,7 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 import os
-
+print("[DEBUG] Current working directory:", os.getcwd())
 # --- Налаштування портів і шляхів ---
 HOST = 'localhost'
 HTTP_PORT = 3000
